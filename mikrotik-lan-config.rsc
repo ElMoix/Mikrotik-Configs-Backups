@@ -3,10 +3,12 @@ add name=bridge-lan
 /interface list
 add name=LAN
 add name=WAN
+# ADDRESS POOL
 /ip pool
 add name=dhcp ranges=192.168.1.100-192.168.1.200
 /ip dhcp-server
 add address-pool=dhcp disabled=no interface=bridge-lan name=dhcp1
+# WHICH PORTS TO USE IN THE BRIDGE
 /interface bridge port
 add bridge=bridge-lan interface=ether2
 add bridge=bridge-lan interface=ether3
@@ -15,6 +17,7 @@ add bridge=bridge-lan interface=ether5
 /interface list member
 add interface=bridge-lan list=LAN
 add interface=ether1 list=WAN
+# CREATING LAN NETWORK
 /ip address
 add address=192.168.1.1/24 comment=XLAN interface=bridge-lan network=192.168.1.0
 /ip dhcp-server network
@@ -31,6 +34,7 @@ add action=accept chain=input comment=Accept-ssh dst-port=22 protocol=tcp
 add action=drop chain=input comment=DROP-other
 /ip route rule
 add dst-address=192.168.1.0/24 table=main
+# ACCESS ROUTER
 /ip service
 set telnet disabled=yes
 set ftp disabled=yes

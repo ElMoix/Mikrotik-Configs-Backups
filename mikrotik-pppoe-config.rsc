@@ -1,7 +1,9 @@
 /interface bridge
 add name=bridge-lan
+# PPPOE VLAN
 /interface vlan
 add interface=ether1 name=ElMoix vlan-id=ElMoix
+# PPPOE AUTH
 /interface pppoe-client
 add add-default-route=yes disabled=no interface=ElMoix name=pppoe password=ElMoix use-peer-dns=yes user=ElMoix
 /interface list
@@ -34,6 +36,7 @@ add action=accept chain=input comment=Accept-winbox dst-port=8291 protocol=tcp
 add action=accept chain=input comment=Accept-web dst-port=80 protocol=tcp
 add action=accept chain=input comment=Accept-ssh dst-port=22 protocol=tcp
 add action=drop chain=input comment=DROP-other
+# DSTNAT PPPOE & MASQUERADE
 /ip firewall nat
 add action=masquerade chain=srcnat comment=masquerade out-interface-list=WAN
 add action=jump chain=dstnat in-interface=pppoe jump-target=DNAT
