@@ -21,6 +21,10 @@ The backups are saved onto the /home/mikrotiks/ directory. You must create it be
 Also it saves the logs onto the /var/log/mikrotik/ directory. You must create it before.
 ```
 
+CRONTAB:
+```
+00 15 * * 5     /root/mikrotikbck.sh /root/mikrotikClients.txt
+```
 # MIKROTIK CONFIG FILES
 
 Each file is for a specific configuration for a RouterOS Mikrotik.
