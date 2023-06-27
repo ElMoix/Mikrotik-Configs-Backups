@@ -16,9 +16,10 @@ root@backups:~# ./mikrotikbck.sh mikrotikClient.txt
 ```
 
 BEFORE DOING NOTHING:
+```
 The backups are saved onto the /home/mikrotiks/ directory. You must create it before.
-
 Also it saves the logs onto the /var/log/mikrotik/ directory. You must create it before.
+```
 
 # MIKROTIK CONFIG FILES
 
