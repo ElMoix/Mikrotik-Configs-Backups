@@ -1,0 +1,4 @@
+# Fitxer de testing del Backup de Mikrotiks
+# nomclient, ip, password, port
+ElMoix,8.8.8.8,h€ll0
+Andreu,8.8.4.4,0arx,2222

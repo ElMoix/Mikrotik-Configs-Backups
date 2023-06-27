@@ -1,3 +1,23 @@
+# SCRIPT FOR BACKUPS
+
+File 'mikrotikbck.sh' it's a bash script used to export the config of mikrotik routers.
+With this we have a backup and automatized system to retrieve all the important config.
+
+You have to add your clients to the 'mikrotikClient.txt' file.
+If you connect to your router via ssh with another port (that's not the default) you can also add it.
+
+This script use the 'sshpass' tool.
+You could also change it and make it with pub/priv keys.
+So you don't need to have plaintext passwords in a file. It's up to you.
+
+EXAMPLE:
+```
+root@backups:~# ./mikrotikbck.sh mikrotikClient.txt 
+```
+
+The backups are saved onto the /home/mikrotiks/ directory. You must create it before.
+Also it saves the logs onto the /var/log/mikrotik/ directory. You must create it before.
+
 # MIKROTIK CONFIG FILES
 
 Each file is for a specific configuration for a RouterOS Mikrotik.
