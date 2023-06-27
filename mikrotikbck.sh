@@ -1,7 +1,8 @@
 #!/bin/bash
 # Script to automate backups for Mikrotiks
 
-trap "rm /home/mikrotiks/*.rsc.tmp" EXIT	# If we combine Ctrl+C we delete all the .rsc.tmp files
+BCKSd="/home/mikrotiks/"
+trap "rm $BCKSd*.rsc.tmp" EXIT	# If we combine Ctrl+C we delete all the .rsc.tmp files
 
 if (( $# < 1 ));then
 	echo "Need at least one param"
@@ -15,6 +16,7 @@ CORREU="/var/log/mikrotik/mikrotiksbck_$DATA.log"
 sshlog="/var/log/mikrotik/mikrotikErrSHH_$DATA.log"
 sendmail="test@example.com"				# Change this
 regexdyn='^[a-zA-Z0-9]{12}\.sn\.mynetname\.net$'	# mikrotik dyn dns
+regexip='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' # check if ip is valid
 wcc=$(cat $input | grep -v "#" | wc -l)
 OK=0
 ERR=0
@@ -60,7 +62,7 @@ do
 			exit 1
 		fi
 		
-		if ! [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ || $ip =~ $regexdyn ]]; then
+		if ! [[ $ip =~ $regexip || $ip =~ $regexdyn ]]; then
 			echo "<div style=\"color:red;\"> <a>File $input is NOT well done (Client: $client/IP: $ip/Pass: $pass/Port: $port)<br/></a></div>" >> $CORREU
                         cat $CORREU | mail -a "Content-type: text/html ; charset=UTF-8" -s "MikrotiksBCK: File $input is NOT well done (ip2-$ip)" $sendmail
 			exit 1
@@ -70,7 +72,7 @@ do
                         cat $CORREU | mail -a "Content-type: text/html ; charset=UTF-8" -s "MikrotiksBCK: File $input is NOT well done (pass-$pass)" $sendmail
 			exit 1
 		fi
-		if ! [[ $port =~ ^[0-9]{1,4}$ || -z $port ]]; then	
+		if ! [[ $port =~ ^[0-9]{1,5}$ || -z $port ]]; then	
                         echo "<div style=\"color:red;\"> <a>File $input is NOT well done (Client: $client/IP: $ip/Pass: $pass/Port: $port)<br/></a></div>" >> $CORREU
                         cat $CORREU | mail -a "Content-type: text/html ; charset=UTF-8" -s "MikrotiksBCK: File $input is NOT well done (port-$port)" $sendmail
                         exit 1
@@ -86,9 +88,9 @@ do
 	        passwd=$(echo $line | awk -F "," '{print $3}')
 		port=$(echo $line | awk -F "," '{print $4}')
 
-		if ! [ -d /home/mikrotiks/$client/ ];then
-			echo "Directory /home/mikrotiks/$client doesn't exists" > /dev/null 	# DEBUG
-			mkdir /home/mikrotiks/$client/
+		if ! [ -d $BCKd$client/ ];then
+			echo "Directory $BCKd$client doesn't exists" > /dev/null 	# DEBUG
+			mkdir $BCKd$client/
 		fi
 
 		# Check if host replies to icmp
@@ -103,10 +105,10 @@ do
 				port2=$(echo -p $port)
 			fi
 
-			sshpass -p $passwd ssh -no StrictHostKeyChecking=no -o ConnectTimeout=10 $port2 admin@$ip export show-sensitive > /home/mikrotiks/$client/$client.rsc.tmp 2> $sshlog
+			sshpass -p $passwd ssh -no StrictHostKeyChecking=no -o ConnectTimeout=10 $port2 admin@$ip export show-sensitive > $BCKd$client/$client.rsc.tmp 2> $sshlog
 			if [ $? == '0' ];then
 				echo "<a>$client OK<br/></a>" >> $CORREU
-				mv /home/mikrotiks/$client/$client.rsc.tmp /home/mikrotiks/$client/$client"0".rsc
+				mv $BCKd$client/$client.rsc.tmp $BCKd$client/$client"0".rsc
 				OK=$(($OK+1))
 			else
 				echo -e "<div style=\"color:red;\"> <a>$client ERROR => $(cat $sshlog)<br/></a></div>" >> $CORREU
@@ -114,26 +116,26 @@ do
 			fi
 			
 			# Log rotate
-			if [ -f /home/mikrotiks/$client/$client"0".rsc ];then			# Check if first backup went well
+			if [ -f $BCKd$client/$client"0".rsc ];then			# Check if first backup went well
 				echo "File $client"0".rsc exists" > /dev/null	# DEBUG
-				if [ -f /home/mikrotiks/$client/$client"7".rsc ];then		# Check if we have 7 days backup
+				if [ -f $BCKd$client/$client"7".rsc ];then		# Check if we have 7 days backup
 					echo "File $client"7".rsc exists" > /dev/null	# DEBUG
-					rm /home/mikrotiks/$client/$client"7".rsc
+					rm $BCKd$client/$client"7".rsc
 				else
 					echo "File $client"7".rsc doesn't exists" > /dev/null	# DEBUG
 				fi
 	
 				for i in {6..0}
 				do
-					if [ -f /home/mikrotiks/$client/$client$i.rsc ];then
-						mv /home/mikrotiks/$client/$client$i.rsc /home/mikrotiks/$client/$client$(($i+1)).rsc
+					if [ -f $BCKd$client/$client$i.rsc ];then
+						mv $BCKd$client/$client$i.rsc $BCKd$client/$client$(($i+1)).rsc
 						echo "We moved $client$i to $client$(($i+1))" > /dev/null	# DEBUG
 					else
-						echo "File /home/mikrotiks/$client/$client$i.rsc doesn't exists" > /dev/null	# DEBUG
+						echo "File $BCKd$client/$client$i.rsc doesn't exists" > /dev/null	# DEBUG
 					fi
 				done
 			else
-				echo "ERROR - File /home/mikrotiks/$client/$client"0".rsc doesn't exists" > /dev/null	# DEBUG
+				echo "ERROR - File $BCKd$client/$client"0".rsc doesn't exists" > /dev/null	# DEBUG
 			fi
 		else
 			echo "ERROR: $client with IP $ip doesn't reply to ping!!" > /dev/null	# DEBUG
